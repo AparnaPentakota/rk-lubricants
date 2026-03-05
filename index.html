@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,112 +7,150 @@
 <title>RK Lubricants</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 :root{
-  --t:#1a6abf;--td:#0a3a7a;--tg:#4da6ff;
-  --rk-orange:#e07020;--rk-blue:#1a6abf;
-  --or:#f97316;--rd:#ef4444;--gn:#22c55e;--bl:#3b82f6;--pu:#a855f7;
-  --bg:#0b1120;--sf:#131c2e;--cd:#182030;--br:#1e2d45;--tx:#e8f0fe;--mt:#7a90b0;
+  --blue:#1a6abf;--dark:#0a3a7a;--light:#3b82f6;
+  --bg:#f4f6fb;--sf:#fff;--cd:#fff;--br:#e2e8f0;
+  --tx:#1e293b;--mt:#64748b;--dim:#94a3b8;
+  --sh:0 1px 4px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;}
+body{font-family:'Inter','Noto Sans Telugu',system-ui,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;}
+
 /* LOGIN */
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
-  background:radial-gradient(ellipse 60% 50% at 20% 20%,rgba(26,106,191,.25),transparent),
-             radial-gradient(ellipse 50% 40% at 80% 80%,rgba(224,112,32,.1),transparent),var(--bg);}
-.lcard{background:var(--cd);border:1px solid var(--br);border-radius:28px;padding:32px 24px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);}
-.rk-logo-wrap{width:90px;height:90px;background:#fff;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 28px rgba(26,106,191,.35);overflow:hidden;padding:4px;}
-.app-title{font-size:24px;font-weight:900;text-align:center;color:#fff;letter-spacing:-.3px;}
-.app-sub{font-size:11px;color:var(--mt);text-align:center;margin:4px 0 22px;letter-spacing:.3px;}
-.rlbl{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
-.rtabs{display:flex;gap:6px;margin-bottom:16px;}
-.rtab{flex:1;padding:10px 4px;border:1.5px solid var(--br);border-radius:12px;background:var(--sf);color:var(--mt);font-size:13px;font-weight:700;cursor:pointer;text-align:center;line-height:1.5;transition:all .15s;}
-.rtab.on{border-color:var(--rk-blue);color:var(--tg);background:rgba(26,106,191,.12);}
-.fl{margin-bottom:13px;}
-.fl label{display:block;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
-.fl input,.fl select{width:100%;padding:12px 14px;background:var(--sf);border:1.5px solid var(--br);border-radius:11px;color:var(--tx);font-size:15px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;font-family:inherit;}
-.fl input:focus,.fl select:focus{border-color:var(--rk-blue);}
-.fl select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a90b0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
-.pinbox{letter-spacing:8px;font-size:22px;text-align:center;}
-.perr{color:var(--rd);font-size:12px;margin-top:5px;font-weight:600;min-height:16px;}
-.btn{width:100%;padding:14px;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;margin-top:10px;font-family:inherit;}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(160deg,#dbeafe,#eff6ff 50%,#f0f9ff);}
+.lcard{background:#fff;border:1px solid #e2e8f0;border-radius:28px;padding:36px 26px;width:100%;box-shadow:0 8px 40px rgba(26,106,191,.12);}
+.rk-logo-wrap{width:96px;height:96px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 4px 20px rgba(26,106,191,.18);overflow:hidden;padding:5px;}
+.app-title{font-size:26px;font-weight:900;text-align:center;color:#0a3a7a;letter-spacing:-.5px;}
+.app-sub{font-size:11px;color:var(--mt);text-align:center;margin:5px 0 24px;}
+.rlbl{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.rtabs{display:flex;gap:8px;margin-bottom:18px;}
+.rtab{flex:1;padding:12px 4px;border:1.5px solid #e2e8f0;border-radius:14px;background:#f8fafc;color:var(--mt);font-size:13px;font-weight:700;cursor:pointer;text-align:center;line-height:1.6;transition:.2s;}
+.rtab.on{border-color:var(--blue);color:var(--blue);background:#eff6ff;box-shadow:0 0 0 3px rgba(26,106,191,.1);}
+.fl{margin-bottom:14px;}
+.fl label{display:block;font-size:10px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.fl input,.fl select{width:100%;padding:12px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;color:var(--tx);font-size:15px;outline:none;transition:.2s;-webkit-appearance:none;appearance:none;font-family:inherit;}
+.fl input:focus,.fl select:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(26,106,191,.1);}
+.fl select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;background-color:#f8fafc;}
+.pinbox{letter-spacing:10px;font-size:24px;text-align:center;font-weight:800;}
+.perr{color:#dc2626;font-size:12px;margin-top:6px;font-weight:600;min-height:16px;}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;transition:.18s;margin-top:10px;font-family:inherit;}
 .btn:active{transform:scale(.97);}
-.bt{background:linear-gradient(135deg,var(--rk-blue),var(--td));color:#fff;box-shadow:0 6px 20px rgba(26,106,191,.4);}
-.bo{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;}
-.br2{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;}
-.bpu{background:linear-gradient(135deg,#a855f7,#7e22ce);color:#fff;}
-.bgn{background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;}
-.bsm{padding:10px 16px;width:auto;font-size:13px;margin-top:0;}
+.bt{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;box-shadow:0 4px 16px rgba(37,99,235,.3);}
+.bo{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 4px 14px rgba(249,115,22,.28);}
+.br2{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.22);}
+.bpu{background:linear-gradient(135deg,#9333ea,#6b21a8);color:#fff;box-shadow:0 4px 14px rgba(147,51,234,.22);}
+.bgn{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 4px 14px rgba(22,163,74,.22);}
+.bsm{padding:10px 18px;width:auto;font-size:13px;margin-top:0;}
+
 /* APP */
-#as{display:none;padding-bottom:72px;}
-.hd{background:linear-gradient(90deg,#0a3a7a,#0d2d5e);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.08);}
+#as{display:none;padding-bottom:76px;}
+.hd{background:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #e8edf5;box-shadow:0 1px 6px rgba(0,0,0,.05);}
 .hdbrand{display:flex;align-items:center;gap:10px;}
-.hd-logo{width:36px;height:36px;background:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px;flex-shrink:0;}
-.hbrand{font-size:15px;font-weight:900;color:#fff;letter-spacing:-.2px;}
-.hrole{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px;}
-.lbtn{background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.8);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;}
-.tc{display:none;padding:0 13px 14px;}.tc.active{display:block;}
-.ptitle{font-size:19px;font-weight:800;margin-bottom:16px;padding-top:14px;}
-.card{background:var(--cd);border:1px solid var(--br);border-radius:16px;padding:16px;margin-bottom:11px;}
+.hd-logo{width:38px;height:38px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.hbrand{font-size:16px;font-weight:900;color:#0a3a7a;}
+.hrole{font-size:10px;color:var(--mt);margin-top:1px;}
+.lbtn{background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;padding:7px 13px;border-radius:9px;font-size:12px;cursor:pointer;font-weight:600;transition:.15s;}
+.lbtn:hover{background:#e2e8f0;}
+
+/* TABS */
+.tc{display:none;padding:0 14px 14px;}.tc.active{display:block;}
+.ptitle{font-size:20px;font-weight:900;margin-bottom:18px;padding-top:16px;color:#0a3a7a;}
+.card{background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--sh);}
+
 /* MONTH FILTER */
-.mf-bar{background:var(--cd);border-bottom:1px solid var(--br);padding:10px 13px;position:sticky;top:60px;z-index:90;}
-.mf-label{font-size:10px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
-.mf-pills{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.mf-bar{background:#fff;border-bottom:1px solid #e8edf5;padding:10px 14px;position:sticky;top:61px;z-index:5;}
+.mf-label{font-size:10px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.mf-pills{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;cursor:pointer;}
 .mf-pills::-webkit-scrollbar{display:none;}
-.mpil{flex-shrink:0;padding:7px 14px;border-radius:20px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
-.mpil.on{background:var(--rk-blue);color:#fff;box-shadow:0 3px 12px rgba(26,106,191,.4);}
-.mpil:not(.on){background:var(--sf);color:var(--mt);border:1px solid var(--br);}
-.mpil.on-rep{background:#7c3aed;box-shadow:0 3px 12px rgba(124,58,237,.4);}
-/* PROFIT CARD */
-.pcb{border-radius:20px;padding:22px;margin-bottom:12px;text-align:center;position:relative;overflow:hidden;}
-.pcb.profit{background:linear-gradient(135deg,#16a34a,#14532d);}
-.pcb.loss{background:linear-gradient(135deg,#dc2626,#7f1d1d);}
-.pcb::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.07);}
-.pcl{font-size:10px;opacity:.8;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
-.pca{font-size:44px;font-weight:900;color:#fff;margin:8px 0;line-height:1;}
-.pcm{font-size:13px;opacity:.8;font-weight:600;}
+.mpil{flex-shrink:0;padding:6px 14px;border-radius:20px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.18s;white-space:nowrap;}
+.mpil.on{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(26,106,191,.28);}
+.mpil:not(.on){background:#f1f5f9;color:var(--mt);border:1px solid #e2e8f0;}
+.mpil.on-rep{background:#7c3aed;box-shadow:0 3px 10px rgba(124,58,237,.28);}
+
+/* PROFIT CARD — compact horizontal */
+.pcb{border-radius:14px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+.pcb.profit{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;}
+.pcb.loss{background:linear-gradient(135deg,#fff5f5,#fee2e2);border:1px solid #fca5a5;}
+.pcb::before{content:'';position:absolute;right:-25px;top:-25px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.5);}
+.pc-left{position:relative;z-index:1;}
+.pcl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px;}
+.pca{font-size:30px;font-weight:900;line-height:1.1;}
+.pcm{font-size:11px;font-weight:600;margin-top:3px;}
+.pcb.profit .pcl,.pcb.profit .pca,.pcb.profit .pcm{color:#15803d;}
+.pcb.loss .pcl,.pcb.loss .pca,.pcb.loss .pcm{color:#b91c1c;}
+.pc-icon{font-size:38px;opacity:.35;flex-shrink:0;position:relative;z-index:1;}
+
 /* STAT GRID */
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;}
-.sc{background:var(--cd);border:1px solid var(--br);border-radius:14px;padding:14px;}
-.sci{font-size:21px;margin-bottom:7px;}.scl{font-size:10px;color:var(--mt);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-.scv{font-size:20px;font-weight:900;margin:3px 0 2px;}.scs{font-size:10px;color:var(--mt);}
-.cg{color:#22c55e}.co{color:#f97316}.cr{color:#ef4444}.cb{color:#3b82f6}.cp{color:#a855f7}.ct{color:var(--tg)}
-.stk{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:16px;padding:16px 18px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center;}
-.stkn{font-size:34px;font-weight:900;line-height:1.1;}.stkv{font-size:11px;opacity:.7;}.stkd{text-align:right;font-size:11px;opacity:.75;line-height:2;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.sc{background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:13px;box-shadow:var(--sh);}
+.sci{font-size:20px;margin-bottom:6px;}
+.scl{font-size:10px;color:var(--mt);font-weight:700;text-transform:uppercase;letter-spacing:.4px;line-height:1.3;}
+.scv{font-size:19px;font-weight:900;margin:3px 0 2px;}
+.scs{font-size:10px;color:var(--dim);}
+.cg{color:#15803d}.co{color:#c2410c}.cr{color:#b91c1c}.cb{color:#1d4ed8}.cp{color:#7e22ce}.ct{color:#0d9488}
+
+/* STOCK */
+.stk{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-radius:14px;padding:15px 18px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.stkn{font-size:30px;font-weight:900;line-height:1.1;color:#1e40af;}
+.stkv{font-size:11px;color:#3b82f6;margin-top:3px;}
+.stkd{text-align:right;font-size:11px;color:#60a5fa;line-height:2;}
+
 /* PREVIEW */
-.pv{border-radius:11px;padding:11px 13px;margin-bottom:13px;font-size:13px;line-height:1.9;display:none;}
-.pvt{background:rgba(26,106,191,.12);border:1.5px solid rgba(26,106,191,.35);}
-.pvo{background:rgba(249,115,22,.1);border:1.5px solid rgba(249,115,22,.25);}
+.pv{border-radius:11px;padding:12px 14px;margin-bottom:13px;font-size:13px;line-height:1.9;display:none;}
+.pvt{background:#eff6ff;border:1.5px solid #bfdbfe;}
+.pvo{background:#fff7ed;border:1.5px solid #fed7aa;}
 .pvl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
-.pvt .pvl{color:var(--tg);}.pvo .pvl{color:var(--or);}
+.pvt .pvl{color:#1d4ed8;}.pvo .pvl{color:#c2410c;}
+
+/* SECTION LABEL */
+.sl{font-size:11px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 9px;display:flex;align-items:center;gap:8px;}
+.sl::after{content:'';flex:1;height:1px;background:#e8edf5;}
+
 /* ENTRIES */
-.sl{font-size:11px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 9px;}
-.er{background:var(--cd);border:1px solid var(--br);border-radius:12px;padding:11px 13px;margin-bottom:7px;}
+.er{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:12px 14px;margin-bottom:7px;box-shadow:var(--sh);}
 .et{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
-.en{font-weight:800;font-size:13px;}.ed{font-size:10px;color:var(--mt);}.edt{font-size:11px;color:var(--mt);}
-.cr2{display:flex;align-items:center;gap:8px;background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:10px 12px;margin-bottom:7px;}
-.ci{flex:1;}.cn{font-weight:700;font-size:13px;}.crt{font-size:11px;color:var(--mt);}
-.db2{background:rgba(239,68,68,.15);border:none;color:var(--rd);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;flex-shrink:0;}
-.rr{background:var(--cd);border:1px solid var(--br);border-radius:12px;padding:12px 15px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
-.rl{font-size:12px;font-weight:800;}.rs{font-size:10px;color:var(--mt);margin-top:2px;}.rv{font-size:17px;font-weight:900;}
+.en{font-weight:800;font-size:13px;color:#1e293b;}
+.ed{font-size:10px;color:var(--mt);background:#f1f5f9;padding:2px 8px;border-radius:6px;}
+.edt{font-size:11px;color:var(--mt);line-height:1.7;}
+
+/* CUSTOMER */
+.cr2{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:12px 14px;margin-bottom:7px;box-shadow:var(--sh);}
+.ci{flex:1;}.cn{font-weight:700;font-size:13px;color:#1e293b;}.crt{font-size:11px;color:var(--mt);margin-top:2px;}
+.db2{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;flex-shrink:0;}
+
+/* REPORT */
+.rr{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:13px 15px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--sh);}
+.rl{font-size:12px;font-weight:800;color:#1e293b;}.rs{font-size:10px;color:var(--mt);margin-top:2px;}.rv{font-size:17px;font-weight:900;}
+
 /* NAV */
-.bn{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--sf);border-top:1px solid var(--br);display:flex;padding:5px 0 max(4px,env(safe-area-inset-bottom));z-index:200;}
-.nb{flex:1;background:none;border:none;cursor:pointer;padding:4px 1px;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.ni{font-size:19px;}.nl{font-size:9px;font-weight:700;color:var(--mt);transition:color .15s;}
-.nb.on .nl{color:var(--tg);}.nd{width:4px;height:4px;border-radius:50%;background:var(--tg);display:none;}
+.bn{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid #e2e8f0;display:flex;padding:5px 0 max(5px,env(safe-area-inset-bottom));z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,.05);}
+.nb{flex:1;background:none;border:none;cursor:pointer;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.ni{font-size:20px;}.nl{font-size:9px;font-weight:700;color:var(--mt);transition:.15s;}
+.nb.on .nl{color:var(--blue);}
+.nd{width:4px;height:4px;border-radius:50%;background:var(--blue);display:none;}
 .nb.on .nd{display:block;}
-/* TOAST */
-.tst{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-16px);background:#1a2540;border:1px solid var(--br);color:var(--tx);padding:10px 20px;border-radius:22px;font-size:12px;font-weight:700;z-index:9999;white-space:nowrap;opacity:0;transition:all .25s;pointer-events:none;}
+
+/* SYNC / TOAST */
+#syncbar{background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:8px 16px;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:700;color:#1d4ed8;}
+.tst{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1e293b;color:#f8fafc;padding:10px 22px;border-radius:24px;font-size:12px;font-weight:700;z-index:9999;white-space:nowrap;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.18);}
 .tst.on{opacity:1;transform:translateX(-50%) translateY(0);}
-.em{color:var(--mt);font-size:12px;padding:6px 0;}
+
+/* MISC */
+.em{color:var(--mt);font-size:12px;padding:8px 0;text-align:center;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.sb{border-radius:12px;padding:12px;margin-bottom:12px;}
-.sbg{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);}
-.sbo{background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.2);}
-.slb{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
-.slbg{color:#22c55e}.slbo{color:#f97316}
+.sb{border-radius:13px;padding:14px;margin-bottom:13px;}
+.sbg{background:#f0fdf4;border:1px solid #bbf7d0;}
+.sbo{background:#fff7ed;border:1px solid #fed7aa;}
+.slb{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px;}
+.slbg{color:#15803d}.slbo{color:#c2410c}
 .orw{display:flex;gap:8px;}
-.orw input{flex:1;padding:10px 12px;background:var(--sf);border:1.5px solid var(--br);border-radius:10px;color:var(--tx);font-size:14px;outline:none;}
-.orw button{padding:10px 16px;background:var(--rk-blue);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;}
+.orw input{flex:1;padding:11px 13px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;color:var(--tx);font-size:14px;outline:none;font-family:inherit;transition:.2s;}
+.orw input:focus{border-color:var(--blue);}
+.orw button{padding:11px 18px;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;border:none;border-radius:11px;font-weight:800;font-size:13px;cursor:pointer;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a3a7a">
@@ -194,28 +233,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
   <!-- DASHBOARD -->
   <div id="t-dashboard" class="tc">
-    <div class="mf-bar">
-      <div class="mf-label">&#128197; నెల ఎంచుకోండి &mdash; Select Month</div>
-      <div class="mf-pills" id="dMoPills"></div>
+    <div style="background:#fff;border-bottom:1px solid #e8edf5;padding:10px 14px;position:sticky;top:61px;z-index:5;">
+      <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;">&#128197; నెల ఎంచుకోండి — Select Month</div>
+      <input type="month" id="dMoSel" onchange="onDashMonth(this.value)" style="width:100%;padding:9px 14px;background:#f8fafc;border:1.5px solid #1a6abf;border-radius:11px;color:#1e293b;font-size:15px;font-weight:700;font-family:inherit;outline:none;cursor:pointer;"/>
     </div>
     <div style="padding:12px 0 0">
       <div id="dPC" class="pcb profit">
-        <div class="pcl">నెట్ లాభం / నష్టం &bull; NET PROFIT / LOSS</div>
-        <div class="pca" id="dPA">&#8377;0</div>
-        <div class="pcm" id="dPM">నెల ఎంచుకోండి</div>
+        <div class="pc-left">
+          <div class="pcl">నెట్ లాభం / నష్టం</div>
+          <div class="pca" id="dPA">&#8377;0</div>
+          <div class="pcm" id="dPM">నెల ఎంచుకోండి</div>
+        </div>
+        <div class="pc-icon" id="dPIcon">📈</div>
       </div>
       <div class="sg">
-        <div class="sc"><div class="sci">&#128200;</div><div class="scl">అమ్మకాలు / Sales</div><div class="scv cg" id="dS">&#8377;0</div><div class="scs" id="dSs">0 పైపాలు</div></div>
-        <div class="sc"><div class="sci">&#128230;</div><div class="scl">కొనుగోలు / Purchase</div><div class="scv co" id="dP">&#8377;0</div><div class="scs" id="dPs">0 పైపాలు</div></div>
+        <div class="sc"><div class="sci">&#128200;</div><div class="scl">అమ్మకాలు / Sales</div><div class="scv cg" id="dS">&#8377;0</div><div class="scs" id="dSs">0 పీపాలు</div></div>
+        <div class="sc"><div class="sci">&#128230;</div><div class="scl">కొనుగోలు / Purchase</div><div class="scv co" id="dP">&#8377;0</div><div class="scs" id="dPs">0 పీపాలు</div></div>
         <div class="sc"><div class="sci">&#128184;</div><div class="scl">ఖర్చులు / Expenses</div><div class="scv cr" id="dE">&#8377;0</div><div class="scs" id="dEs"></div></div>
         <div class="sc"><div class="sci">&#128119;</div><div class="scl">జీతాలు / Salaries</div><div class="scv cp" id="dSal">&#8377;0</div><div class="scs">ఈ నెల చెల్లింపులు</div></div>
         <div class="sc"><div class="sci">&#128176;</div><div class="scl">జమ Cash</div><div class="scv cb" id="dC">&#8377;0</div><div class="scs">Drivers నుండి</div></div>
-        <div class="sc"><div class="sci">&#127981;</div><div class="scl">తయారు / Produced</div><div class="scv ct" id="dPr">0</div><div class="scs">పైపాలు ఈ నెల</div></div>
+        <div class="sc"><div class="sci">&#127981;</div><div class="scl">తయారు / Produced</div><div class="scv ct" id="dPr">0</div><div class="scs">పీపాలు ఈ నెల</div></div>
       </div>
       <div class="stk">
         <div>
           <div style="font-size:10px;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">&#127981; మిగిలిన స్టాక్</div>
-          <div class="stkn" id="dSt">0 పైపాలు</div>
+          <div class="stkn" id="dSt">0 పీపాలు</div>
           <div class="stkv" id="dStV">విలువ: &#8377;0</div>
         </div>
         <div class="stkd" id="dStD"></div>
@@ -238,8 +280,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div style="font-size:13px;font-weight:800;margin-bottom:12px;">&#10133; కొత్త Customer జోడించండి</div>
       <div class="fl"><label>Party పేరు *</label><input type="text" id="cNm" placeholder="ఉదా: Raju Oil Depot"/></div>
       <div class="g2">
-        <div class="fl"><label>Sell Rate (&#8377;/పైప)</label><input type="number" id="cSR" placeholder="15000" inputmode="decimal"/></div>
-        <div class="fl"><label>Buy Rate (&#8377;/పైప)</label><input type="number" id="cBR" placeholder="9000" inputmode="decimal"/></div>
+        <div class="fl"><label>Sell Rate (&#8377;/పీపా)</label><input type="number" id="cSR" placeholder="15000" inputmode="decimal"/></div>
+        <div class="fl"><label>Buy Rate (&#8377;/పీపా)</label><input type="number" id="cBR" placeholder="9000" inputmode="decimal"/></div>
       </div>
       <div class="fl"><label>Phone (ఐచ్ఛికం)</label><input type="tel" id="cPh" placeholder="9876543210" inputmode="numeric"/></div>
       <button class="btn bt" onclick="addCust()">&#9989; Customer జోడించండి</button>
@@ -257,7 +299,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <div class="fl"><label>Worker పేరు *</label><input type="text" id="wNm" placeholder="పేరు"/></div>
       </div>
       <div class="g2">
-        <div class="fl"><label>వాడిన Waste Oil (పైపాలు)</label><input type="number" id="wW" placeholder="0" inputmode="decimal" oninput="wPv()"/></div>
+        <div class="fl"><label>వాడిన Waste Oil (పీపాలు)</label><input type="number" id="wW" placeholder="0" inputmode="decimal" oninput="wPv()"/></div>
         <div class="fl"><label>తయారైన Recycled Oil</label><input type="number" id="wR" placeholder="0" inputmode="decimal" oninput="wPv()"/></div>
       </div>
       <div class="g2">
@@ -294,8 +336,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         </div>
         <div id="dCSN" class="fl" style="display:none"><label>Customer పేరు (manual)</label><input type="text" id="dCSNm" placeholder="పేరు టైప్ చేయండి"/></div>
         <div class="g2">
-          <div class="fl"><label>అమ్మిన పైపాలు</label><input type="number" id="dSo" placeholder="0" inputmode="decimal" oninput="dPv()"/></div>
-          <div class="fl"><label>Rate (&#8377;/పైప)</label><input type="number" id="dSR" placeholder="15000" inputmode="decimal" oninput="dPv()"/></div>
+          <div class="fl"><label>అమ్మిన పీపాలు</label><input type="number" id="dSo" placeholder="0" inputmode="decimal" oninput="dPv()"/></div>
+          <div class="fl"><label>Rate (&#8377;/పీపా)</label><input type="number" id="dSR" placeholder="15000" inputmode="decimal" oninput="dPv()"/></div>
         </div>
       </div>
       <div class="sb sbo">
@@ -308,8 +350,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         </div>
         <div id="dCBN" class="fl" style="display:none"><label>Supplier పేరు (manual)</label><input type="text" id="dCBNm" placeholder="పేరు టైప్ చేయండి"/></div>
         <div class="g2">
-          <div class="fl"><label>కొన్న పైపాలు</label><input type="number" id="dBo" placeholder="0" inputmode="decimal" oninput="dPv()"/></div>
-          <div class="fl"><label>Rate (&#8377;/పైప)</label><input type="number" id="dBR" placeholder="9000" inputmode="decimal" oninput="dPv()"/></div>
+          <div class="fl"><label>కొన్న పీపాలు</label><input type="number" id="dBo" placeholder="0" inputmode="decimal" oninput="dPv()"/></div>
+          <div class="fl"><label>Rate (&#8377;/పీపా)</label><input type="number" id="dBR" placeholder="9000" inputmode="decimal" oninput="dPv()"/></div>
         </div>
       </div>
       <div class="g2">
@@ -362,15 +404,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
   <!-- REPORT -->
   <div id="t-report" class="tc">
-    <div class="mf-bar">
-      <div class="mf-label">&#128203; నెల Report ఎంచుకోండి &mdash; Select Month</div>
-      <div class="mf-pills" id="rMoPills"></div>
+    <div style="background:#fff;border-bottom:1px solid #e8edf5;padding:10px 14px;position:sticky;top:61px;z-index:5;">
+      <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;">&#128203; నెల Report ఎంచుకోండి — Select Month</div>
+      <input type="month" id="rMoSel" onchange="onRepMonth(this.value)" style="width:100%;padding:9px 14px;background:#f8fafc;border:1.5px solid #7c3aed;border-radius:11px;color:#1e293b;font-size:15px;font-weight:700;font-family:inherit;outline:none;cursor:pointer;"/>
     </div>
     <div style="padding:12px 0 0">
       <div id="rPC" class="pcb profit">
-        <div class="pcl">నెట్ లాభం / నష్టం &bull; NET PROFIT / LOSS</div>
-        <div class="pca" id="rA">&#8377;0</div>
-        <div class="pcm" id="rM">నెల ఎంచుకోండి</div>
+        <div class="pc-left">
+          <div class="pcl">నెట్ లాభం / నష్టం</div>
+          <div class="pca" id="rA">&#8377;0</div>
+          <div class="pcm" id="rM">నెల ఎంచుకోండి</div>
+        </div>
+        <div class="pc-icon" id="rPIcon">📈</div>
       </div>
       <button class="btn bgn" style="margin-bottom:12px;" onclick="dlXL(repMo)">&#128229; Excel డౌన్లోడ్ (.xlsx)</button>
       <div id="rSt"></div>
@@ -444,8 +489,17 @@ const fmtK=k=>{if(!k)return'';const[y,m]=k.split('-');return MN_TE[+m]+' '+y;};
 const fmtS=k=>{if(!k)return'';const[y,m]=k.split('-');return MN_TE[+m]+'\''+String(y).slice(2);};
 
 function allK(){
-  const s=new Set([nowK()]);
-  [...D.workers,...D.drivers,...D.expenses,...D.salaries].forEach(e=>{const k=mkK(e.date);if(k)s.add(k);});
+  const s=new Set();
+  // Add last 12 months always
+  const now=new Date();
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    s.add(d.getFullYear()+'-'+d.getMonth());
+  }
+  // Add months from data too
+  [...D.workers,...D.drivers,...D.expenses,...D.salaries].forEach(e=>{
+    const k=mkK(e.date);if(k)s.add(k);
+  });
   return Array.from(s).sort().reverse();
 }
 function calc(mk){
@@ -502,17 +556,23 @@ function setTab(id){
 function setTod(id){const el=document.getElementById(id);if(el&&!el.value)el.value=tod();}
 
 function bDF(){
-  const keys=allK();
-  if(!selMo||!keys.includes(selMo))selMo=keys[0]||nowK();
-  document.getElementById('dMoPills').innerHTML=keys.map(k=>`<button class="mpil ${k===selMo?'on':''}" onclick="sDMo('${k}')">${fmtS(k)}</button>`).join('');
-  document.getElementById('oi').value=D.op;
+  if(!selMo)selMo=nowK();
+  // Convert internal key "2026-2" to input format "2026-03"
+  const[y,m]=selMo.split('-');
+  const mo=String(parseInt(m)+1).padStart(2,'0');
+  const inp=document.getElementById('dMoSel');
+  if(inp)inp.value=y+'-'+mo;
+  const oi=document.getElementById('oi');
+  if(oi)oi.value=D.op;
   updDash();
 }
 function sDMo(k){selMo=k;bDF();updDash();}
 function bRF(){
-  const keys=allK();
-  if(!repMo||!keys.includes(repMo))repMo=keys[0]||nowK();
-  document.getElementById('rMoPills').innerHTML=keys.map(k=>`<button class="mpil ${k===repMo?'on on-rep':''}" onclick="sRMo('${k}')">${fmtS(k)}</button>`).join('');
+  if(!repMo)repMo=nowK();
+  const[y,m]=repMo.split('-');
+  const mo=String(parseInt(m)+1).padStart(2,'0');
+  const inp=document.getElementById('rMoSel');
+  if(inp)inp.value=y+'-'+mo;
   updRep();
 }
 function sRMo(k){repMo=k;bRF();updRep();}
@@ -520,13 +580,14 @@ function sRMo(k){repMo=k;bRF();updRep();}
 function updDash(){
   const r=calc(selMo);
   document.getElementById('dPC').className='pcb '+(r.profit>=0?'profit':'loss');
+  if(document.getElementById('dPIcon'))document.getElementById('dPIcon').textContent=r.profit>=0?'📈':'📉';
   document.getElementById('dPA').textContent=(r.profit>=0?'+':'')+inr(r.profit);
-  document.getElementById('dPM').textContent=fmtK(selMo)+' \u2014 '+(r.profit>=0?'\uD83D\uDC4D \u0C32\u0C3E\u0C2D\u0C02':'\uD83D\uDC4E \u0C28\u0C37\u0C4D\u0C1F\u0C02');
-  document.getElementById('dS').textContent=inr(r.sales);document.getElementById('dSs').textContent=r.sold+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41';
-  document.getElementById('dP').textContent=inr(r.purchase);document.getElementById('dPs').textContent=r.bought+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41';
+  document.getElementById('dPM').textContent=fmtK(selMo||nowK())+' \u2014 '+(r.profit>=0?'\uD83D\uDC4D \u0C32\u0C3E\u0C2D\u0C02':'\uD83D\uDC4E \u0C28\u0C37\u0C4D\u0C1F\u0C02');
+  document.getElementById('dS').textContent=inr(r.sales);document.getElementById('dSs').textContent=r.sold+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41';
+  document.getElementById('dP').textContent=inr(r.purchase);document.getElementById('dPs').textContent=r.bought+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41';
   document.getElementById('dE').textContent=inr(r.totExp);document.getElementById('dEs').textContent='Diesel: '+inr(r.dExp);
   document.getElementById('dSal').textContent=inr(r.salT);document.getElementById('dC').textContent=inr(r.cash);document.getElementById('dPr').textContent=r.prod;
-  document.getElementById('dSt').textContent=r.stock+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41';
+  document.getElementById('dSt').textContent=r.stock+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41';
   document.getElementById('dStV').textContent='\u0C35\u0C3F\u0C32\u0C41\u0C35: '+inr(r.stock*15000);
   document.getElementById('dStD').innerHTML='Opening: '+D.op+'<br>+\u0C24\u0C2F\u0C3E\u0C30\u0C41: '+r.prod+'<br>-\u0C05\u0C2E\u0C4D\u0C2E\u0C3E\u0C30\u0C41: '+r.sold;
 }
@@ -558,7 +619,7 @@ function cBC(){const v=document.getElementById('dCB').value;document.getElementB
 
 function wPv(){
   const wa=nv(document.getElementById('wW').value),re=nv(document.getElementById('wR').value),bx=document.getElementById('wPvB');
-  if(wa&&re){bx.style.display='block';document.getElementById('wPvC').innerHTML='Recovery: <b>'+((re/wa)*100).toFixed(1)+'%</b> &nbsp;\u2022&nbsp; \u0C28\u0C37\u0C4D\u0C1F\u0C02: <b>'+nv(document.getElementById('wL').value)+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41</b>';}
+  if(wa&&re){bx.style.display='block';document.getElementById('wPvC').innerHTML='Recovery: <b>'+((re/wa)*100).toFixed(1)+'%</b> &nbsp;\u2022&nbsp; \u0C28\u0C37\u0C4D\u0C1F\u0C02: <b>'+nv(document.getElementById('wL').value)+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41</b>';}
   else bx.style.display='none';
 }
 function saveW(){
@@ -621,15 +682,16 @@ function renderSL(){
 function updRep(){
   const r=calc(repMo);
   document.getElementById('rPC').className='pcb '+(r.profit>=0?'profit':'loss');
+  if(document.getElementById('rPIcon'))document.getElementById('rPIcon').textContent=r.profit>=0?'📈':'📉';
   document.getElementById('rA').textContent=(r.profit>=0?'+':'')+inr(r.profit);
-  document.getElementById('rM').textContent=fmtK(repMo)+' \u2014 '+(r.profit>=0?'\uD83D\uDC4D \u0C32\u0C3E\u0C2D\u0C02':'\uD83D\uDC4E \u0C28\u0C37\u0C4D\u0C1F\u0C02');
+  document.getElementById('rM').textContent=fmtK(repMo||nowK())+' \u2014 '+(r.profit>=0?'\uD83D\uDC4D \u0C32\u0C3E\u0C2D\u0C02':'\uD83D\uDC4E \u0C28\u0C37\u0C4D\u0C1F\u0C02');
   document.getElementById('rSt').innerHTML=[
-    ['\uD83D\uDCC8','\u0C05\u0C2E\u0C4D\u0C2E\u0C15\u0C3E\u0C32\u0C41 / Sales',inr(r.sales),r.sold+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41','cg'],
-    ['\uD83D\uDCE6','\u0C15\u0C4A\u0C28\u0C41\u0C17\u0C4B\u0C32\u0C41 / Purchase',inr(r.purchase),r.bought+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41','co'],
+    ['\uD83D\uDCC8','\u0C05\u0C2E\u0C4D\u0C2E\u0C15\u0C3E\u0C32\u0C41 / Sales',inr(r.sales),r.sold+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41','cg'],
+    ['\uD83D\uDCE6','\u0C15\u0C4A\u0C28\u0C41\u0C17\u0C4B\u0C32\u0C41 / Purchase',inr(r.purchase),r.bought+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41','co'],
     ['\uD83D\uDCB8','\u0C16\u0C30\u0C4D\u0C1A\u0C41\u0C32\u0C41 / Expenses',inr(r.totExp),'Diesel: '+inr(r.dExp)+' | Other: '+inr(r.oExp),'cr'],
     ['\uD83D\uDC77','\u0C1C\u0C40\u0C24\u0C3E\u0C32\u0C41 / Salaries',inr(r.salT),r.se.length+' \u0C1A\u0C46\u0C32\u0C4D\u0C32\u0C3F\u0C02\u0C2A\u0C41\u0C32\u0C41','cp'],
     ['\uD83D\uDCB0','\u0C1C\u0C2E Cash',inr(r.cash),'Drivers \u0C28\u0C41\u0C02\u0C21\u0C3F','cb'],
-    ['\uD83C\uDFED','\u0C38\u0C4D\u0C1F\u0C3E\u0C15\u0C4D / Stock',r.stock+' \u0C2A\u0C48\u0C2A\u0C3E\u0C32\u0C41','\u0C35\u0C3F\u0C32\u0C41\u0C35: '+inr(r.stock*15000),'ct'],
+    ['\uD83C\uDFED','\u0C38\u0C4D\u0C1F\u0C3E\u0C15\u0C4D / Stock',r.stock+' \u0C2A\u0C40\u0C2A\u0C3E\u0C32\u0C41','\u0C35\u0C3F\u0C32\u0C41\u0C35: '+inr(r.stock*15000),'ct'],
   ].map(([ic,lb,vl,sb,cl])=>`<div class="rr"><div><div class="rl">${ic} ${lb}</div><div class="rs">${sb}</div></div><div class="rv ${cl}">${vl}</div></div>`).join('');
   let h='';
   h+=`<div class="sl">\uD83D\uDE97 Driver Entries (${r.de.length})</div>`;
@@ -648,8 +710,8 @@ function dlXL(mk){
   const ws1=XLSX.utils.aoa_to_sheet([
     ['RK Lubricants \u2014 Monthly Report','',''],['Month/\u0C28\u0C46\u0C32:',mo,''],['','',''],
     ['ITEM','\u0C2E\u0C4A\u0C24\u0C4D\u0C24\u0C02 (Rs)','Details'],
-    ['\u0C05\u0C2E\u0C4D\u0C2E\u0C15\u0C3E\u0C32\u0C41/Sales',r.sales,r.sold+' barrels'],
-    ['\u0C15\u0C4A\u0C28\u0C41\u0C17\u0C4B\u0C32\u0C41/Purchase',r.purchase,r.bought+' barrels'],
+    ['\u0C05\u0C2E\u0C4D\u0C2E\u0C15\u0C3E\u0C32\u0C41/Sales',r.sales,r.sold+' పీపాలు'],
+    ['\u0C15\u0C4A\u0C28\u0C41\u0C17\u0C4B\u0C32\u0C41/Purchase',r.purchase,r.bought+' పీపాలు'],
     ['Driver Expenses',r.dExp,''],['Other Expenses',r.oExp,''],
     ['\u0C1C\u0C40\u0C24\u0C3E\u0C32\u0C41/Salaries',r.salT,''],
     ['\u0C2E\u0C4A\u0C24\u0C4D\u0C24\u0C02 \u0C16\u0C30\u0C4D\u0C1A\u0C41\u0C32\u0C41',r.totExp,''],['','',''],
@@ -684,6 +746,19 @@ function refreshData(){
     if(on)setTab(on.id.replace('nb-',''));
     toast('\u2705 Data refresh అయింది!');
   });
+}
+function monthInputToKey(v){
+  if(!v)return nowK();
+  const[y,m]=v.split('-');
+  return y+'-'+String(parseInt(m)-1);
+}
+function onDashMonth(v){
+  selMo=monthInputToKey(v);
+  updDash();
+}
+function onRepMonth(v){
+  repMo=monthInputToKey(v);
+  updRep();
 }
 function toast(msg){const t=document.getElementById('tst');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2400);}
 document.getElementById('pi').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
