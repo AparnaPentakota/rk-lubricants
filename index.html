@@ -17,7 +17,7 @@
 // CONFIG
 // ═══════════════════════════════════════════
 const PIN_ADMIN = '0609', PIN_STAFF = '2222';
-const SK = 'rk_v11';
+const SK = 'rk_v12';
 const FB = 'https://rk-lubricants-default-rtdb.firebaseio.com/appdata.json';
 const LITRES_PER_BARREL = 200;
 const MN = ['జనవరి','ఫిబ్రవరి','మార్చి','ఏప్రిల్','మే','జూన్','జులై','ఆగస్టు','సెప్టెంబర్','అక్టోబర్','నవంబర్','డిసెంబర్'];
@@ -31,6 +31,7 @@ const TABS = {
     {id:'stock',    i:'📦',l:'స్టాక్<br><small>Stock</small>'},
     {id:'expense',  i:'💸',l:'ఖర్చులు<br><small>Expense</small>'},
     {id:'salary',   i:'👷',l:'జీతాలు<br><small>Salary</small>'},
+    {id:'finance',  i:'🏦',l:'ఫైనాన్స్<br><small>Finance</small>'},
     {id:'report',   i:'📋',l:'రిపోర్ట్<br><small>Report</small>'}
   ],
   worker:[{id:'worker',i:'⚙️',l:'వర్కర్<br><small>Worker</small>'}],
@@ -43,7 +44,7 @@ const TABS = {
 // ═══════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════
-let D = {customers:[],workers:[],drivers:[],expenses:[],salaries:[],grease:[],stock:[],op:0};
+let D = {customers:[],workers:[],drivers:[],expenses:[],salaries:[],grease:[],stock:[],op:0,openingBalance:{},creditSales:[],creditPurchases:[]};
 let role = '', selMo = '', repMo = '', curRole = 0, repView = 'monthly';
 let sRows = [], pRows = [];
 var _delId = null; var _delType = null;
@@ -116,34 +117,90 @@ function doConf() {
   closeConf();
   if (!id || !type) return;
   if (type === 'customer')  { D.customers = D.customers.filter(function(e){ return e.id != id; }); fbSave(); renderCustomers(); }
-  else if (type === 'worker')   { D.workers   = D.workers.filter(function(e){ return e.id != id; });   fbSave(); renderWorkers(); }
-  else if (type === 'driver')   { D.drivers   = D.drivers.filter(function(e){ return e.id != id; });   fbSave(); renderDrivers(); }
-  else if (type === 'expense')  { D.expenses  = D.expenses.filter(function(e){ return e.id != id; });  fbSave(); renderExpenses(); }
-  else if (type === 'salary')   { D.salaries  = D.salaries.filter(function(e){ return e.id != id; });  fbSave(); renderSalaries(); }
-  else if (type === 'grease')   { D.grease    = D.grease.filter(function(e){ return e.id != id; });    fbSave(); renderGrease(); }
-  else if (type === 'stock')    { D.stock     = D.stock.filter(function(e){ return e.id != id; });     fbSave(); renderStock(); }
+  else if (type === 'worker')   { D.workers   = D.workers.filter(function(e){ return e.id != id; });   fbSave(); renderWorkers();   updDash(); }
+  else if (type === 'driver')   { D.drivers   = D.drivers.filter(function(e){ return e.id != id; });   fbSave(); renderDrivers();   updDash(); }
+  else if (type === 'expense')  { D.expenses  = D.expenses.filter(function(e){ return e.id != id; });  fbSave(); renderExpenses();  updDash(); }
+  else if (type === 'salary')   { D.salaries  = D.salaries.filter(function(e){ return e.id != id; });  fbSave(); renderSalaries();  updDash(); }
+  else if (type === 'grease')   { D.grease    = D.grease.filter(function(e){ return e.id != id; });    fbSave(); renderGrease();    updDash(); }
+  else if (type === 'stock')    { D.stock     = D.stock.filter(function(e){ return e.id != id; });     fbSave(); renderStock();     updDash(); }
+  else if (type === 'creditSale')   { D.creditSales = D.creditSales.filter(function(e){ return e.id != id; }); fbSave(); renderCreditSales(); renderDrivers(); updDash(); }
+  else if (type === 'creditPurch')  { D.creditPurchases = D.creditPurchases.filter(function(e){ return e.id != id; }); fbSave(); renderCreditPurchases(); renderDrivers(); updDash(); }
   toast('🗑️ తీసేశాం!', '#15803d');
+}
+
+// ─── Mic Permission Guide ─────────────────
+var _micPendingField = null;
+function showMicGuide(fieldId) {
+  _micPendingField = fieldId;
+  // Reset to ask state
+  $('mg-ask').style.display = 'block';
+  $('mg-blocked').style.display = 'none';
+  $('mg-success').style.display = 'none';
+  $('mic-guide-modal').style.display = 'flex';
+}
+function closeMicGuide() {
+  $('mic-guide-modal').style.display = 'none';
+  _micPendingField = null;
+}
+function requestMicPermission() {
+  // Use getUserMedia to trigger the native browser permission popup
+  navigator.mediaDevices.getUserMedia({audio: true})
+    .then(function(stream) {
+      // Permission granted — stop tracks immediately, we don't need the stream
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      $('mg-ask').style.display = 'none';
+      $('mg-success').style.display = 'block';
+    })
+    .catch(function(err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        $('mg-ask').style.display = 'none';
+        $('mg-blocked').style.display = 'block';
+      } else {
+        toast('⚠️ Mic error: ' + err.message, '#dc2626');
+        closeMicGuide();
+      }
+    });
+}
+function finishMicSetup() {
+  $('mic-guide-modal').style.display = 'none';
+  var f = _micPendingField;
+  _micPendingField = null;
+  if (f) _startMicNow(f);
+}
+function proceedMic() {
+  $('mic-guide-modal').style.display = 'none';
+  var f = _micPendingField;
+  _micPendingField = null;
+  _startMicNow(f);
 }
 
 // ─── Voice input ─────────────────────────
 function startMic(fieldId) {
-  // Get SpeechRecognition at call time (not at parse time)
   var SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SRClass) {
     toast('⚠️ Chrome browser వాడండి — Voice support కావాలి', '#dc2626');
     return;
   }
-  // If already listening, stop
-  if (micObj) {
-    micObj.abort();
-    micObj = null;
-    return;
+  if (micObj) { micObj.abort(); micObj = null; return; }
+  // Check if permission already granted
+  if (navigator.permissions) {
+    navigator.permissions.query({name:'microphone'}).then(function(r){
+      if (r.state === 'granted') {
+        _startMicNow(fieldId);
+      } else if (r.state === 'denied') {
+        showMicGuide(fieldId);
+      } else {
+        // 'prompt' — show guide first, then trigger
+        showMicGuide(fieldId);
+      }
+    }).catch(function(){ _startMicNow(fieldId); });
+  } else {
+    _startMicNow(fieldId);
   }
-  // Check HTTPS (mic needs HTTPS or localhost)
-  if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-    toast('⚠️ Mic కు HTTPS అవసరం (GitHub Pages లో OK)', '#dc2626');
-    // Still try — some browsers allow on http too
-  }
+}
+function _startMicNow(fieldId) {
+  var SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SRClass) return;
   var gotResult = false;
   micObj = new SRClass();
   micObj.lang = 'te-IN';
@@ -152,10 +209,7 @@ function startMic(fieldId) {
   micObj.continuous = false;
   $('mic-bar').style.display = 'flex';
   document.querySelectorAll('[data-mic="'+fieldId+'"]').forEach(function(b){ b.classList.add('listening'); });
-  
-  micObj.onstart = function() {
-    toast('🎤 మాట్లాడండి...', '#1a4fa8');
-  };
+  micObj.onstart = function() { toast('🎤 మాట్లాడండి...', '#1a4fa8'); };
   micObj.onresult = function(e) {
     gotResult = true;
     var t = e.results[0][0].transcript;
@@ -165,8 +219,12 @@ function startMic(fieldId) {
     stopMic(fieldId);
   };
   micObj.onerror = function(e) {
+    if (e.error === 'not-allowed') {
+      stopMic(fieldId);
+      showMicGuide(fieldId);
+      return;
+    }
     var msgs = {
-      'not-allowed':   '⚠️ Mic permission లేదు — browser settings లో allow చేయండి',
       'no-speech':     '⚠️ మాటలు వినపడలేదు — మళ్ళీ try చేయండి',
       'network':       '⚠️ Network error — internet check చేయండి',
       'audio-capture': '⚠️ Mic కనుగొనలేదు',
@@ -176,13 +234,7 @@ function startMic(fieldId) {
     if (msg) toast(msg, '#dc2626');
     stopMic(fieldId);
   };
-  micObj.onend = function() {
-    if (!gotResult) {
-      // Only stop if we didn't already get a result
-    }
-    stopMic(fieldId);
-  };
-  
+  micObj.onend = function() { stopMic(fieldId); };
   try {
     micObj.start();
   } catch(err) {
@@ -209,7 +261,7 @@ async function fbLoad() {
     const r = await fetch(FB);
     const v = await r.json();
     if (v && typeof v === 'object') {
-      D = Object.assign({customers:[],workers:[],drivers:[],expenses:[],salaries:[],grease:[],stock:[],op:0}, v);
+      D = Object.assign({customers:[],workers:[],drivers:[],expenses:[],salaries:[],grease:[],stock:[],op:0,openingBalance:{},creditSales:[],creditPurchases:[]}, v);
       svLocal(); renderAll();
     }
   } catch(e) { toast('⚠️ Offline — local data', '#ca8a04'); }
@@ -257,11 +309,12 @@ function setTab(id) {
   if(id==='dashboard') { updDash(); $('dashMoPick').value=mo2inp(selMo); }
   if(id==='customers') renderCustomers();
   if(id==='worker')    { setToday('wDt'); renderWorkers(); }
-  if(id==='driver')    { setToday('dDt'); initDrvForm(); renderDrivers(); }
+  if(id==='driver')    { setToday('dDt'); initDrvForm(); renderDrivers(); renderCreditSales(); renderCreditPurchases(); }
   if(id==='grease')    { setToday('grDt'); renderGrease(); }
   if(id==='stock')     { setToday('stDt'); renderStock(); }
   if(id==='expense')   { setToday('exDt'); renderExpenses(); }
   if(id==='salary')    { setToday('slDt'); renderSalaries(); }
+  if(id==='finance')   { setToday('obMo'); setToday('csDt'); setToday('cpDt'); renderOpeningBalances(); renderCreditSales(); renderCreditPurchases(); const mn=mo2inp(selMo); if($('finMoPick'))$('finMoPick').value=mn; }
   if(id==='report')    { repMo=repMo||nowK(); $('repMoPick').value=mo2inp(repMo); buildReport(); }
 }
 
@@ -279,14 +332,23 @@ function calc(mk) {
   const otherExp    = ee.reduce((s,e)=>s+nv(e.amt),0);
   const salTotal    = se.reduce((s,e)=>s+nv(e.amt),0);
   const totalExp    = drvExp + otherExp + salTotal;
-  // Profit = Sales + Grease − Purchase − Expenses − Salaries
-  const profit = sales + greaseSales - purchase - totalExp;
+  // Opening balance for this month
+  const ob = (D.openingBalance && D.openingBalance[mk]) || {};
+  const openCash = nv(ob.cash);
+  const openStock = nv(ob.stock);
+  // Credit sales & purchases for this month
+  const csArr = (D.creditSales||[]).filter(e=>mkK(e.date)===mk);
+  const cpArr = (D.creditPurchases||[]).filter(e=>mkK(e.date)===mk);
+  const creditSalesPending = csArr.reduce((s,e)=>s+nv(e.balanceDue),0);
+  const creditPurchPending = cpArr.reduce((s,e)=>s+nv(e.balanceRemaining),0);
+  // Profit = Sales + OpeningCash − Purchase − Expenses − Salaries
+  const profit = sales + greaseSales + openCash - purchase - totalExp;
   const prod   = we.reduce((s,e)=>s+nv(e.rec),0);
   const soldB  = de.reduce((s,e)=>s+nv(e.totSoldB),0);
   const cash   = de.reduce((s,e)=>s+nv(e.cash),0);
   const latestSt = (D.stock||[]).slice().sort((a,b)=>a.date>b.date?-1:1)[0];
   const stock  = latestSt ? latestSt.closing : (D.op||0)+prod-soldB;
-  return {sales,purchase,greaseSales,drvExp,otherExp,salTotal,totalExp,profit,prod,soldB,cash,stock};
+  return {sales,purchase,greaseSales,drvExp,otherExp,salTotal,totalExp,profit,prod,soldB,cash,stock,openCash,openStock,creditSalesPending,creditPurchPending};
 }
 
 // ─── Dashboard ────────────────────────────
@@ -309,6 +371,9 @@ function updDash() {
   txt('dProd', r.prod.toFixed(2));
   txt('dStock', r.stock.toFixed(2));
   txt('dCash', inr(r.cash));
+  txt('dOpenCash', inr(r.openCash));
+  txt('dCreditSalePend', inr(r.creditSalesPending));
+  txt('dCreditPurchPend', inr(r.creditPurchPending));
 }
 function onDashMo(v) { selMo=inp2mo(v); updDash(); }
 
@@ -630,15 +695,19 @@ function buildReport() {
     +'<div style="background:'+(isP?'#f0fdf4':'#fef2f2')+';border-radius:11px;padding:13px;text-align:center;margin-bottom:11px">'
     +'<div style="font-size:11px;font-weight:700;color:'+(isP?'#15803d':'#b91c1c')+'">'+( isP?'లాభం':'నష్టం')+'</div>'
     +'<div style="font-size:28px;font-weight:900;color:'+(isP?'#15803d':'#b91c1c')+'">'+( isP?'+':'')+inr(r.profit)+'</div>'
-    +'<div style="font-size:11px;color:#64748b;margin-top:4px">Sales + Grease − Purchase − Expenses − Salaries</div>'
+    +'<div style="font-size:11px;color:#64748b;margin-top:4px">Sales + Opening Cash − Purchase − Expenses − Salaries</div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px">'
+    +'<div style="padding:8px;background:#eff6ff;border-radius:8px">Opening Cash<br><b class="cb">'+inr(r.openCash)+'</b></div>'
     +'<div style="padding:8px;background:#f0fdf4;border-radius:8px">అమ్మకాలు<br><b class="cg">'+inr(r.sales)+'</b></div>'
     +'<div style="padding:8px;background:#fefce8;border-radius:8px">Grease<br><b class="cy">'+inr(r.greaseSales)+'</b></div>'
     +'<div style="padding:8px;background:#fef2f2;border-radius:8px">Purchase<br><b class="cr">'+inr(r.purchase)+'</b></div>'
     +'<div style="padding:8px;background:#fff7ed;border-radius:8px">Expenses<br><b class="co">'+inr(r.totalExp)+'</b></div>'
     +'<div style="padding:8px;background:#faf5ff;border-radius:8px">Salaries<br><b class="cp">'+inr(r.salTotal)+'</b></div>'
-    +'<div style="padding:8px;background:#eff6ff;border-radius:8px">Cash<br><b class="cb">'+inr(r.cash)+'</b></div>'
+    +'<div style="padding:8px;background:#fef2f2;border-radius:8px">Credit Sales Pending<br><b class="cr">'+inr(r.creditSalesPending)+'</b></div>'
+    +'<div style="padding:8px;background:#fef2f2;border-radius:8px">Credit Purch Pending<br><b class="cr">'+inr(r.creditPurchPending)+'</b></div>'
+    +'<div style="padding:8px;background:#eff6ff;border-radius:8px">Cash Collected<br><b class="cb">'+inr(r.cash)+'</b></div>'
+    +'<div style="padding:8px;background:#f0fdf4;border-radius:8px">Opening Stock<br><b class="cg">'+r.openStock.toFixed(2)+' పీ</b></div>'
     +'</div></div>';
   buildDailyView(mk);
   setRepView(repView);
@@ -714,10 +783,151 @@ function dlXL() {
   XLSX.writeFile(wb,'RK_'+fmtMo(mk)+'.xlsx');
 }
 
+// ─── Opening Balance ──────────────────────
+function saveOpeningBalance() {
+  const mo = $('obMo').value; if(!mo) return toast('⚠️ నెల ఎంచుకోండి!','#dc2626');
+  const mk = inp2mo(mo);
+  const cash = nv($('obCash').value);
+  const stock = nv($('obStock').value);
+  const notes = $('obNotes').value.trim();
+  if(!D.openingBalance) D.openingBalance = {};
+  D.openingBalance[mk] = {cash, stock, notes, savedAt: Date.now()};
+  fbSave();
+  toast('✅ Opening Balance సేవ్ అయింది!','#15803d');
+  renderOpeningBalances();
+  updDash();
+}
+function renderOpeningBalances() {
+  const e=$('obList'); if(!e) return;
+  const entries = Object.entries(D.openingBalance||{}).sort((a,b)=>b[0]>a[0]?1:-1);
+  if(!entries.length){ e.innerHTML='<div class="empty">Opening Balances లేవు</div>'; return; }
+  e.innerHTML = '<div class="el-title">Opening Balances</div>'
+    + entries.map(([mk,ob])=>'<div class="entry"><div class="et">'
+      +'<div class="en">📅 '+fmtMo(mk)+'</div>'
+      +'<div class="ea cg">'+inr(ob.cash)+'</div></div>'
+      +'<div class="ed">Cash: '+inr(ob.cash)+' | Stock: '+ob.stock+' పీపాలు'+(ob.notes?' | '+ob.notes:'')+'</div>'
+      +'<button class="edel" onclick="delOpeningBalance(\''+mk+'\')">తీసేయి</button></div>').join('');
+}
+function delOpeningBalance(mk) {
+  if(confirm('ఈ opening balance తీసేస్తారా?')) {
+    delete D.openingBalance[mk]; fbSave(); renderOpeningBalances(); updDash();
+    toast('🗑️ తీసేశాం!','#15803d');
+  }
+}
+
+// ─── Credit Sales ────────────────────────
+function calcCreditSale() {
+  const qty = nv($('csQty').value), rate = nv($('csRate').value);
+  const total = qty * rate;
+  const paid = nv($('csPaid').value);
+  $('csTotal').value = total ? inr(total) : '';
+  $('csBalance').value = total ? inr(Math.max(0, total - paid)) : '';
+}
+function saveCreditSale() {
+  const dt=$('csDt').value, cust=$('csCust').value.trim();
+  if(!dt||!cust) return toast('⚠️ తేదీ & Customer అవసరం!','#dc2626');
+  const qty=nv($('csQty').value), rate=nv($('csRate').value);
+  if(!qty||!rate) return toast('⚠️ Qty & Rate అవసరం!','#dc2626');
+  const unit=$('csUnit').value, total=qty*rate;
+  const paid=nv($('csPaid').value), bal=Math.max(0,total-paid);
+  const notes=$('csNotes').value.trim();
+  if(!D.creditSales) D.creditSales=[];
+  D.creditSales.push({id:Date.now(),date:dt,customer:cust,qty,unit,rate,total,paid,balanceDue:bal,notes});
+  fbSave(); toast('✅ Credit Sale సేవ్ అయింది!','#15803d');
+  ['csCust','csQty','csRate','csPaid','csNotes'].forEach(id=>$(id).value='');
+  $('csTotal').value=''; $('csBalance').value=''; $('csDt').value=dt;
+  renderCreditSales(); renderDrivers(); updDash();
+}
+function delCreditSale(id) { confirmDel('ఈ credit sale తీసేస్తారా?','creditSale',id); }
+function renderCreditSales(filterMk) {
+  const renderTo = (eid) => {
+    const e=$(eid); if(!e) return;
+    let arr = (D.creditSales||[]).slice().reverse();
+    if(filterMk) arr = arr.filter(x=>mkK(x.date)===filterMk);
+    // For driver screen show only pending (balanceDue > 0)
+    const forDriver = eid === 'csList';
+    const showArr = forDriver ? arr.filter(x=>x.balanceDue>0) : arr;
+    if(!showArr.length){ e.innerHTML='<div class="empty">'+(forDriver?'Pending credit sales లేవు':'Credit Sales లేవు')+'</div>'; return; }
+    e.innerHTML = '<div class="el-title">Credit Sales ('+showArr.length+')</div>'
+      + showArr.map(cs=>{
+        const hasBal = cs.balanceDue > 0;
+        return '<div class="entry"><div class="et">'
+          +'<div><div class="en">👤 '+cs.customer+'</div>'
+          +'<div class="ed">'+cs.date+' | '+cs.qty+' '+(cs.unit||'barrels')+' @ '+inr(cs.rate)+'</div></div>'
+          +'<button class="edel" onclick="delCreditSale('+cs.id+')">తీసేయి</button></div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px;font-size:11px">'
+          +'<div style="background:#f0fdf4;padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Total</div><b class="cg">'+inr(cs.total)+'</b></div>'
+          +'<div style="background:#eff6ff;padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Paid</div><b class="cb">'+inr(cs.paid)+'</b></div>'
+          +'<div style="background:'+(hasBal?'#fef2f2':'#f0fdf4')+';padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Balance</div><b style="color:'+(hasBal?'#dc2626':'#15803d')+'">'+inr(cs.balanceDue)+'</b></div>'
+          +'</div>'+(cs.notes?'<div class="ed" style="margin-top:4px">📝 '+cs.notes+'</div>':'')
+          +'</div>';
+      }).join('');
+  };
+  renderTo('csList');
+  renderTo('finCsList');
+}
+
+// ─── Credit Purchases ─────────────────────
+function calcCreditPurch() {
+  const qty=nv($('cpQty').value), rate=nv($('cpRate').value);
+  const total=qty*rate, paid=nv($('cpPaid').value);
+  $('cpTotal').value = total ? inr(total) : '';
+  $('cpBalance').value = total ? inr(Math.max(0,total-paid)) : '';
+}
+function saveCreditPurch() {
+  const dt=$('cpDt').value, supp=$('cpSupp').value.trim();
+  if(!dt||!supp) return toast('⚠️ తేదీ & Supplier అవసరం!','#dc2626');
+  const qty=nv($('cpQty').value), rate=nv($('cpRate').value);
+  if(!qty||!rate) return toast('⚠️ Qty & Rate అవసరం!','#dc2626');
+  const total=qty*rate, paid=nv($('cpPaid').value), bal=Math.max(0,total-paid);
+  const notes=$('cpNotes').value.trim();
+  if(!D.creditPurchases) D.creditPurchases=[];
+  D.creditPurchases.push({id:Date.now(),date:dt,supplier:supp,qty,rate,total,paid,balanceRemaining:bal,notes});
+  fbSave(); toast('✅ Credit Purchase సేవ్ అయింది!','#15803d');
+  ['cpSupp','cpQty','cpRate','cpPaid','cpNotes'].forEach(id=>$(id).value='');
+  $('cpTotal').value=''; $('cpBalance').value=''; $('cpDt').value=dt;
+  renderCreditPurchases(); renderDrivers(); updDash();
+}
+function delCreditPurch(id) { confirmDel('ఈ credit purchase తీసేస్తారా?','creditPurch',id); }
+function renderCreditPurchases(filterMk) {
+  const renderTo = (eid) => {
+    const e=$(eid); if(!e) return;
+    let arr = (D.creditPurchases||[]).slice().reverse();
+    if(filterMk) arr = arr.filter(x=>mkK(x.date)===filterMk);
+    const forDriver = eid === 'cpList';
+    const showArr = forDriver ? arr.filter(x=>x.balanceRemaining>0) : arr;
+    if(!showArr.length){ e.innerHTML='<div class="empty">'+(forDriver?'Pending credit purchases లేవు':'Credit Purchases లేవు')+'</div>'; return; }
+    e.innerHTML = '<div class="el-title">Credit Purchases ('+showArr.length+')</div>'
+      + showArr.map(cp=>{
+        const hasBal = cp.balanceRemaining > 0;
+        return '<div class="entry"><div class="et">'
+          +'<div><div class="en">🏭 '+cp.supplier+'</div>'
+          +'<div class="ed">'+cp.date+' | '+cp.qty+' పీపాలు @ '+inr(cp.rate)+'</div></div>'
+          +'<button class="edel" onclick="delCreditPurch('+cp.id+')">తీసేయి</button></div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px;font-size:11px">'
+          +'<div style="background:#fff7ed;padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Total</div><b class="co">'+inr(cp.total)+'</b></div>'
+          +'<div style="background:#eff6ff;padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Paid</div><b class="cb">'+inr(cp.paid)+'</b></div>'
+          +'<div style="background:'+(hasBal?'#fef2f2':'#f0fdf4')+';padding:5px;border-radius:6px;text-align:center"><div style="color:#64748b">Remaining</div><b style="color:'+(hasBal?'#dc2626':'#15803d')+'">'+inr(cp.balanceRemaining)+'</b></div>'
+          +'</div>'+(cp.notes?'<div class="ed" style="margin-top:4px">📝 '+cp.notes+'</div>':'')
+          +'</div>';
+      }).join('');
+  };
+  renderTo('cpList');
+  renderTo('finCpList');
+}
+
+// ─── Finance tab month filter ─────────────
+function onFinMo(v) {
+  const mk = v ? inp2mo(v) : undefined;
+  renderCreditSales(mk);
+  renderCreditPurchases(mk);
+}
+
 // ─── Render All ───────────────────────────
 function renderAll() {
   renderCustomers(); renderWorkers(); renderDrivers();
-  renderGrease(); renderStock(); renderExpenses(); renderSalaries(); updDash();
+  renderGrease(); renderStock(); renderExpenses(); renderSalaries();
+  renderOpeningBalances(); renderCreditSales(); renderCreditPurchases(); updDash();
 }
 
 // ─── Init ─────────────────────────────────
@@ -948,6 +1158,11 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
 .mbtn{flex:1;padding:11px;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
 .mbtn-cancel{background:#f1f5f9;color:#475569;}
 .mbtn-del{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;}
+/* ── Mic Guide ── */
+.mg-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.mg-num{min-width:26px;height:26px;background:linear-gradient(135deg,#1a4fa8,#0f3580);color:#fff;border-radius:50%;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.mg-txt{font-size:12px;color:#374151;line-height:1.55;}
+.mg-txt b{color:#0f172a;}
 
 /* ━━ TOAST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:90vw;}
@@ -970,6 +1185,69 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
     <div class="modal-btns">
       <button class="mbtn mbtn-cancel" onclick="closeConf()">Cancel</button>
       <button class="mbtn mbtn-del" onclick="doConf()">Delete చేయండి</button>
+    </div>
+  </div>
+</div>
+
+<!-- MIC PERMISSION GUIDE MODAL -->
+<div class="modal-ov" id="mic-guide-modal" style="display:none" onclick="if(event.target===this)closeMicGuide()">
+  <div class="modal" style="max-width:340px;padding:0;overflow:hidden;border-radius:18px">
+    <div style="background:linear-gradient(135deg,#1a4fa8,#0f3580);padding:18px 18px 14px;text-align:center">
+      <div style="font-size:40px;margin-bottom:6px">🎤</div>
+      <div style="color:#fff;font-size:16px;font-weight:900">Microphone Permission కావాలి</div>
+      <div style="color:rgba(255,255,255,.65);font-size:12px;margin-top:3px">Voice తో type చేయడానికి ఒక్కసారి Allow చేయండి</div>
+    </div>
+    <div style="padding:16px 18px" id="mg-body">
+
+      <!-- State A: Ask to enable -->
+      <div id="mg-ask">
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#15803d;line-height:1.7">
+          👇 <b>క్రింద button నొక్కండి</b><br>
+          Browser permission popup వస్తుంది — అందులో<br>
+          <b style="font-size:14px">"Allow" నొక్కండి</b> — అంతే! ✅<br>
+          <span style="color:#64748b;font-size:11px">(ఒక్కసారి Allow చేస్తే మళ్ళీ అడగదు)</span>
+        </div>
+        <button onclick="requestMicPermission()" style="width:100%;padding:14px;background:linear-gradient(135deg,#15803d,#14532d);border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
+          🎤 Microphone Enable చేయండి
+        </button>
+        <button onclick="closeMicGuide()" style="width:100%;margin-top:9px;padding:11px;background:#f1f5f9;border:1.5px solid #dde3ee;border-radius:10px;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit">
+          Cancel
+        </button>
+      </div>
+
+      <!-- State B: Permanently blocked -->
+      <div id="mg-blocked" style="display:none">
+        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#991b1b;line-height:1.7">
+          ⛔ <b>Microphone Block అయింది</b><br>
+          మీరు ముందు "Block" నొక్కారు. ఇప్పుడు<br>
+          Phone Settings లో manually allow చేయాలి.
+        </div>
+        <div style="font-size:12px;color:#374151;line-height:1.8;margin-bottom:14px">
+          <b>Android Chrome కోసం:</b><br>
+          📱 Phone Settings → Apps → Chrome<br>
+          → Permissions → Microphone → Allow<br><br>
+          <b>లేదా Chrome Settings కోసం:</b><br>
+          ⚙️ Chrome menu (⋮) → Settings<br>
+          → Site Settings → Microphone<br>
+          → ఈ app/site → Allow చేయండి
+        </div>
+        <button onclick="closeMicGuide()" style="width:100%;padding:12px;background:#f1f5f9;border:1.5px solid #dde3ee;border-radius:10px;font-size:14px;font-weight:800;color:#475569;cursor:pointer;font-family:inherit">
+          సరే, తర్వాత చేస్తాను
+        </button>
+      </div>
+
+      <!-- State C: Success -->
+      <div id="mg-success" style="display:none">
+        <div style="text-align:center;padding:8px 0 14px">
+          <div style="font-size:48px">✅</div>
+          <div style="font-size:15px;font-weight:900;color:#15803d;margin-top:6px">Permission వచ్చింది!</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px">ఇప్పుడు Voice వాడవచ్చు 🎉</div>
+        </div>
+        <button onclick="finishMicSetup()" style="width:100%;padding:13px;background:linear-gradient(135deg,#15803d,#14532d);border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:inherit">
+          🎤 మాట్లాడండి →
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1052,15 +1330,21 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
         <input type="month" class="mo-inp" id="dashMoPick" onchange="onDashMo(this.value)"/>
       </div>
       <div class="dgrid">
+        <div class="dcard"><div class="dc-i">🏦</div><div class="dc-l">Opening Cash</div><div class="dc-v cb" id="dOpenCash">₹0</div><div class="dc-s">నెల మొదట</div></div>
         <div class="dcard"><div class="dc-i">💰</div><div class="dc-l">అమ్మకాలు</div><div class="dc-v cg" id="dSales">₹0</div><div class="dc-s">Sales</div></div>
         <div class="dcard"><div class="dc-i">🟡</div><div class="dc-l">Grease Sales</div><div class="dc-v cy" id="dGrease">₹0</div><div class="dc-s">ఈ నెల</div></div>
         <div class="dcard"><div class="dc-i">🛒</div><div class="dc-l">కొనుగోలు</div><div class="dc-v cr" id="dPurch">₹0</div><div class="dc-s">Purchase</div></div>
         <div class="dcard"><div class="dc-i">💸</div><div class="dc-l">Total Expenses</div><div class="dc-v co" id="dExp">₹0</div><div class="dc-s">ఈ నెల</div></div>
         <div class="dcard"><div class="dc-i">👷</div><div class="dc-l">Salaries</div><div class="dc-v cp" id="dSal">₹0</div><div class="dc-s">ఈ నెల</div></div>
+        <div class="dcard" style="border:2px solid #fca5a5"><div class="dc-i">📤</div><div class="dc-l">Credit Sales Pending</div><div class="dc-v cr" id="dCreditSalePend">₹0</div><div class="dc-s">వసూలు కావాలి</div></div>
+        <div class="dcard" style="border:2px solid #fca5a5"><div class="dc-i">📥</div><div class="dc-l">Credit Purch Pending</div><div class="dc-v cr" id="dCreditPurchPend">₹0</div><div class="dc-s">చెల్లించాలి</div></div>
         <div class="dcard"><div class="dc-i">🛢️</div><div class="dc-l">అమ్మిన పీపాలు</div><div class="dc-v cb" id="dSoldB">0</div><div class="dc-s">Barrels</div></div>
         <div class="dcard"><div class="dc-i">🏭</div><div class="dc-l">Produced</div><div class="dc-v cg" id="dProd">0</div><div class="dc-s">పీపాలు</div></div>
         <div class="dcard"><div class="dc-i">📦</div><div class="dc-l">Stock Closing</div><div class="dc-v cb" id="dStock">0</div><div class="dc-s">పీపాలు</div></div>
         <div class="dcard" style="grid-column:1/-1"><div class="dc-i">💵</div><div class="dc-l">Cash Collected</div><div class="dc-v cg" id="dCash">₹0</div></div>
+      </div>
+      <div style="margin:10px 12px;padding:12px;background:#fff;border-radius:12px;font-size:11px;color:#64748b;text-align:center;border:1px solid #e2e8f0">
+        💡 Profit = Sales + Opening Cash − Purchase − Expenses − Salaries
       </div>
     </div>
 
@@ -1182,6 +1466,22 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
         <button class="btn btn-orange" onclick="saveDriver()">✅ Driver Entry సేవ్ చేయండి</button>
       </div>
       <div id="dList"></div>
+
+      <!-- Credit Pending Summary in Driver Screen -->
+      <div style="margin:0 12px 8px">
+        <div style="font-size:13px;font-weight:800;color:#0f172a;padding:8px 0 6px;display:flex;align-items:center;gap:6px">
+          📤 Credit Sales Pending <span style="font-size:10px;font-weight:600;color:#64748b">(వసూలు కావలసినవి)</span>
+          <button onclick="setTab('finance')" style="margin-left:auto;font-size:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#1a4fa8;padding:3px 9px;border-radius:7px;font-weight:700;cursor:pointer">మరిన్ని చూడండి ›</button>
+        </div>
+        <div id="csList"></div>
+      </div>
+      <div style="margin:0 12px 12px">
+        <div style="font-size:13px;font-weight:800;color:#0f172a;padding:8px 0 6px;display:flex;align-items:center;gap:6px">
+          📥 Credit Purchases Pending <span style="font-size:10px;font-weight:600;color:#64748b">(చెల్లించవలసినవి)</span>
+          <button onclick="setTab('finance')" style="margin-left:auto;font-size:10px;background:#fff7ed;border:1px solid #fdba74;color:#ea580c;padding:3px 9px;border-radius:7px;font-weight:700;cursor:pointer">మరిన్ని చూడండి ›</button>
+        </div>
+        <div id="cpList"></div>
+      </div>
     </div>
 
     <!-- ─── GREASE ─── -->
@@ -1277,6 +1577,120 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
         <button class="btn btn-purple" onclick="saveSalary()">✅ Salary సేవ్ చేయండి</button>
       </div>
       <div id="slList"></div>
+    </div>
+
+    <!-- ─── FINANCE ─── -->
+    <div class="tab" id="t-finance">
+      <div class="ptitle">🏦 Finance Management</div>
+
+      <!-- Month Filter -->
+      <div class="card" style="padding:11px;margin-bottom:0">
+        <div class="fl"><label>నెల వారీ Filter</label>
+          <input type="month" id="finMoPick" onchange="onFinMo(this.value)"
+            style="width:100%;padding:10px;border:1.5px solid #dde3ee;border-radius:9px;font-size:14px;font-family:inherit;outline:none"/>
+        </div>
+      </div>
+
+      <!-- Opening Balance Section -->
+      <div style="margin:14px 12px 4px;font-size:14px;font-weight:900;color:#0f172a">🏦 Opening Balance</div>
+      <div class="card">
+        <div class="g2">
+          <div class="fl"><label>నెల (Month) *</label>
+            <input type="month" id="obMo" style="width:100%;padding:10px;border:1.5px solid #dde3ee;border-radius:9px;font-size:14px;font-family:inherit;outline:none"/>
+          </div>
+          <div class="fl"><label>Opening Cash ₹ *</label>
+            <input type="number" id="obCash" placeholder="0" inputmode="decimal"/>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Opening Oil Stock (పీపాలు)</label>
+            <input type="number" id="obStock" placeholder="0" inputmode="decimal"/>
+          </div>
+          <div class="fl"><label>Notes</label>
+            <input type="text" id="obNotes" placeholder="గమనికలు"/>
+          </div>
+        </div>
+        <button class="btn btn-blue" onclick="saveOpeningBalance()">✅ Opening Balance సేవ్ చేయండి</button>
+      </div>
+      <div id="obList" style="margin-bottom:8px"></div>
+
+      <!-- Credit Sales Section -->
+      <div style="margin:14px 12px 4px;font-size:14px;font-weight:900;color:#0f172a">📤 Credit Sales <span style="font-size:11px;font-weight:600;color:#64748b">(అమ్మకం — తర్వాత వసూలు)</span></div>
+      <div class="card">
+        <div class="g2">
+          <div class="fl"><label>తేదీ *</label><input type="date" id="csDt"/></div>
+          <div class="fl"><label>Customer పేరు *</label>
+            <input type="text" id="csCust" placeholder="Customer పేరు"/>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Quantity *</label>
+            <input type="number" id="csQty" placeholder="0" inputmode="decimal" oninput="calcCreditSale()"/>
+          </div>
+          <div class="fl"><label>Unit</label>
+            <select id="csUnit">
+              <option value="barrels">పీపాలు (Barrels)</option>
+              <option value="litres">లీటర్లు (Litres)</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Rate ₹ *</label>
+            <input type="number" id="csRate" placeholder="0" inputmode="decimal" oninput="calcCreditSale()"/>
+          </div>
+          <div class="fl"><label>Total Amount (Auto)</label>
+            <input type="text" id="csTotal" readonly style="background:#f0fdf4;font-weight:800;color:#15803d"/>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Amount Paid ₹</label>
+            <input type="number" id="csPaid" placeholder="0" inputmode="decimal" oninput="calcCreditSale()"/>
+          </div>
+          <div class="fl"><label>Balance Due (Auto)</label>
+            <input type="text" id="csBalance" readonly style="background:#fef2f2;font-weight:800;color:#dc2626"/>
+          </div>
+        </div>
+        <div class="fl"><label>Notes</label>
+          <input type="text" id="csNotes" placeholder="వివరాలు"/>
+        </div>
+        <button class="btn btn-green" onclick="saveCreditSale()">✅ Credit Sale సేవ్ చేయండి</button>
+      </div>
+      <div id="finCsList"></div>
+
+      <!-- Credit Purchases Section -->
+      <div style="margin:14px 12px 4px;font-size:14px;font-weight:900;color:#0f172a">📥 Credit Purchases <span style="font-size:11px;font-weight:600;color:#64748b">(కొనుగోలు — తర్వాత చెల్లింపు)</span></div>
+      <div class="card">
+        <div class="g2">
+          <div class="fl"><label>తేదీ *</label><input type="date" id="cpDt"/></div>
+          <div class="fl"><label>Supplier పేరు *</label>
+            <input type="text" id="cpSupp" placeholder="Supplier పేరు"/>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Quantity (పీపాలు) *</label>
+            <input type="number" id="cpQty" placeholder="0" inputmode="decimal" oninput="calcCreditPurch()"/>
+          </div>
+          <div class="fl"><label>Rate ₹/పీపా *</label>
+            <input type="number" id="cpRate" placeholder="0" inputmode="decimal" oninput="calcCreditPurch()"/>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fl"><label>Total Amount (Auto)</label>
+            <input type="text" id="cpTotal" readonly style="background:#fff7ed;font-weight:800;color:#ea580c"/>
+          </div>
+          <div class="fl"><label>Amount Paid ₹</label>
+            <input type="number" id="cpPaid" placeholder="0" inputmode="decimal" oninput="calcCreditPurch()"/>
+          </div>
+        </div>
+        <div class="fl"><label>Balance Remaining (Auto)</label>
+          <input type="text" id="cpBalance" readonly style="background:#fef2f2;font-weight:800;color:#dc2626"/>
+        </div>
+        <div class="fl"><label>Notes</label>
+          <input type="text" id="cpNotes" placeholder="వివరాలు"/>
+        </div>
+        <button class="btn btn-orange" onclick="saveCreditPurch()">✅ Credit Purchase సేవ్ చేయండి</button>
+      </div>
+      <div id="finCpList"></div>
     </div>
 
     <!-- ─── REPORT ─── -->
