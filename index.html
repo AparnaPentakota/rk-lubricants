@@ -46,7 +46,7 @@ const TABS = {
 let D = {customers:[],workers:[],drivers:[],expenses:[],salaries:[],grease:[],stock:[],op:0};
 let role = '', selMo = '', repMo = '', curRole = 0, repView = 'monthly';
 let sRows = [], pRows = [];
-let delCb = null;
+var _delId = null; var _delType = null;
 let micObj = null;
 // unit state: 'barrel' | 'litre'
 let wWaUnit = 'barrel', wReUnit = 'barrel';
@@ -101,13 +101,29 @@ function toast(msg, bg) {
 }
 
 // ─── Confirm ─────────────────────────────
-function confirmDel(msg, cb) {
+function confirmDel(msg, type, id) {
   $('conf-msg').textContent = msg;
+  _delType = type;
+  _delId = id;
   $('conf-modal').style.display = 'flex';
-  delCb = cb;
 }
-function closeConf() { $('conf-modal').style.display='none'; delCb=null; }
-function doConf()    { closeConf(); if(delCb) delCb(); }
+function closeConf() {
+  $('conf-modal').style.display = 'none';
+  _delId = null; _delType = null;
+}
+function doConf() {
+  var id = _delId, type = _delType;
+  closeConf();
+  if (!id || !type) return;
+  if (type === 'customer')  { D.customers = D.customers.filter(function(e){ return e.id != id; }); fbSave(); renderCustomers(); }
+  else if (type === 'worker')   { D.workers   = D.workers.filter(function(e){ return e.id != id; });   fbSave(); renderWorkers(); }
+  else if (type === 'driver')   { D.drivers   = D.drivers.filter(function(e){ return e.id != id; });   fbSave(); renderDrivers(); }
+  else if (type === 'expense')  { D.expenses  = D.expenses.filter(function(e){ return e.id != id; });  fbSave(); renderExpenses(); }
+  else if (type === 'salary')   { D.salaries  = D.salaries.filter(function(e){ return e.id != id; });  fbSave(); renderSalaries(); }
+  else if (type === 'grease')   { D.grease    = D.grease.filter(function(e){ return e.id != id; });    fbSave(); renderGrease(); }
+  else if (type === 'stock')    { D.stock     = D.stock.filter(function(e){ return e.id != id; });     fbSave(); renderStock(); }
+  toast('🗑️ తీసేశాం!', '#15803d');
+}
 
 // ─── Voice input ─────────────────────────
 function startMic(fieldId) {
@@ -309,9 +325,7 @@ function addCustomer() {
   fbSave(); toast('✅ Party సేవ్ అయింది!','#15803d');
   $('cNm').value=''; $('cPh').value=''; renderCustomers();
 }
-function delCustomer(id) {
-  confirmDel('ఈ party తీసేస్తారా?', ()=>{ D.customers=D.customers.filter(c=>c.id!=id); fbSave(); renderCustomers(); });
-}
+function delCustomer(id) { confirmDel('ఈ party తీసేస్తారా?', 'customer', id); }
 function renderCustomers() {
   const e=$('custList'); if(!e) return;
   e.innerHTML = D.customers.length
@@ -359,9 +373,7 @@ function saveWorker() {
   $('wWaHint').textContent=''; $('wReHint').textContent=''; $('wPv').style.display='none';
   renderWorkers();
 }
-function delWorker(id) {
-  confirmDel('ఈ worker entry తీసేస్తారా?',()=>{ D.workers=D.workers.filter(e=>e.id!=id); fbSave(); renderWorkers(); });
-}
+function delWorker(id) { confirmDel('ఈ worker entry తీసేస్తారా?', 'worker', id); }
 function renderWorkers() {
   const e=$('wList'); if(!e) return;
   const a = D.workers.slice(-20).reverse();
@@ -489,9 +501,7 @@ function saveDriver() {
   $('dDt').value=dt; $('dNm').value=nm;
   ['dDi','dOt','dCa','dNt'].forEach(id=>$(id).value='');
 }
-function delDriver(id) {
-  confirmDel('ఈ driver entry తీసేస్తారా?',()=>{ D.drivers=D.drivers.filter(e=>e.id!=id); fbSave(); renderDrivers(); });
-}
+function delDriver(id) { confirmDel('ఈ driver entry తీసేస్తారా?', 'driver', id); }
 function renderDrivers() {
   const e=$('dList'); if(!e) return;
   if(role!=='admin'){e.style.display='none';return;}
@@ -519,9 +529,7 @@ function saveGrease() {
   ['grQty','grPeep','grRate','grNt'].forEach(id=>$(id).value='');
   $('grTotal').value=''; $('grDt').value=dt; renderGrease();
 }
-function delGrease(id) {
-  confirmDel('ఈ grease entry తీసేస్తారా?',()=>{ D.grease=D.grease.filter(e=>e.id!=id); fbSave(); renderGrease(); });
-}
+function delGrease(id) { confirmDel('ఈ grease entry తీసేస్తారా?', 'grease', id); }
 function renderGrease() {
   const e=$('grList'); if(!e) return;
   const a=(D.grease||[]).slice(-20).reverse();
@@ -547,9 +555,7 @@ function saveStock() {
   ['stOp','stPr','stSo'].forEach(id=>$(id).value='');
   $('stCl').value=''; $('stDt').value=dt; renderStock();
 }
-function delStock(id) {
-  confirmDel('ఈ stock record తీసేస్తారా?',()=>{ D.stock=D.stock.filter(e=>e.id!=id); fbSave(); renderStock(); });
-}
+function delStock(id) { confirmDel('ఈ stock record తీసేస్తారా?', 'stock', id); }
 function renderStock() {
   const e=$('stList'); if(!e) return;
   const a=(D.stock||[]).slice(-20).reverse();
@@ -571,9 +577,7 @@ function saveExpense() {
   fbSave(); toast('✅ Expense సేవ్ అయింది!','#15803d');
   $('exAmt').value=''; $('exNt').value=''; $('exDt').value=dt; renderExpenses();
 }
-function delExpense(id) {
-  confirmDel('ఈ expense తీసేస్తారా?',()=>{ D.expenses=D.expenses.filter(e=>e.id!=id); fbSave(); renderExpenses(); });
-}
+function delExpense(id) { confirmDel('ఈ expense తీసేస్తారా?', 'expense', id); }
 function renderExpenses() {
   const e=$('exList'); if(!e) return;
   const a=D.expenses.slice(-20).reverse();
@@ -596,9 +600,7 @@ function saveSalary() {
   ['slNm','slAmt','slNt'].forEach(id=>$(id).value='');
   $('slDt').value=dt; renderSalaries();
 }
-function delSalary(id) {
-  confirmDel('ఈ salary తీసేస్తారా?',()=>{ D.salaries=D.salaries.filter(e=>e.id!=id); fbSave(); renderSalaries(); });
-}
+function delSalary(id) { confirmDel('ఈ salary తీసేస్తారా?', 'salary', id); }
 function renderSalaries() {
   const e=$('slList'); if(!e) return;
   const a=D.salaries.slice(-20).reverse();
@@ -938,7 +940,7 @@ body{font-family:'Noto Sans Telugu',sans-serif;background:var(--bg);color:var(--
 .drow{font-size:11px;color:#475569;padding:3px 0;border-top:1px solid #f8fafc;line-height:1.5;}
 
 /* ━━ MODAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;display:flex;align-items:flex-end;justify-content:center;padding:16px;}
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:16px;}
 .modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:420px;}
 .modal h3{font-size:16px;font-weight:900;margin-bottom:7px;}
 .modal p{font-size:13px;color:var(--sub);margin-bottom:17px;line-height:1.6;}
